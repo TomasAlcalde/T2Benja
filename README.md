@@ -21,7 +21,7 @@ Los sonidos estan implementados pero no funcionan bien.
 #### Entrega Final: 46 pts (75%)
 ##### ✅ Ventana Inicio: 
 Se visualiza correctamente la ventana mostrando lo solicitado en donde el salon de fama se actualiza, las validaciones son cliente servidor notificando en caso de que no se cumpla algo. El boton salir cierra la ventana y termina el programa.
-##### ✅🟠 Ventana Juego:
+##### ✅ Ventana Juego:
 Se cargan correctamente los archivos del laberinto, se visualiza todo correctame lo que piden (exceptuando que al recoger un objeto este se elimina del backend pero no del frontend). Las estadisticas de tiempo, vidas, puntaje, etc se van actualizando a medida que el juego progresa, el boton de salir funciona correctamente.
 ##### 🟠 ConejoChico:
 Cuando colisiona el conejo con un lobo o una zanahoria este pierde una vida y vuelve al principio (hay cierto margen de error en la colision, por lo tanto hay veces que "toca" y no se muere el conejo).
@@ -30,18 +30,18 @@ El movimiento de conejo chico es fluido y se detiene al chocar con la pared (tie
 Funcionan correctamente, tienen direccion y velocidades individuales
 ##### ✅ Cañón de Zanahorias:
 Funcionan correctamente, tienen dirrecion dependiendo de donde apunte y se mueven de manera independiente.
-##### ❌ Bomba Manzana:
-No implementado, sin embargo se muestra el objeto en el inventario cuando se apreta g encima de uno de ellos.
-##### ❌ Bomba Congeladora:
-No implementado, pero lo mismo que la anterior
+##### 🟠 Bomba Manzana:
+No implementado la funcionalidad de hacer click, sin embargo se muestra el objeto en el inventario cuando se apreta g encima de uno de ellos y se acumulan en el inventario en el frontend y el backend. (Falto solo implementar el click y la explocion)
+##### 🟠 Bomba Congeladora:
+No implementado la funcionalidad de hacer click, sin embargo se muestra el objeto en el inventario cuando se apreta g encima de uno de ellos y se acumulan en el inventario en el frontend y el backend. (Falto solo implementar el click y la explocion)
 ##### ✅ Fin del nivel:
 Implementadas ambas formas de terminar el nivel, unicamente al pasar de nivel se manda la info al servidor y se actualiza en puntaje.txt
 ##### ✅🟠 Fin del Juego: 
 Se notifica con el mensaje y se muestra el puntaje total, aunque este implementado el sonido no suena.
 ##### 🟠 Recoger (G):
-Funciona recoger objetos pero no ponerlos con el click
+Funciona recoger objetos pero no ponerlos con el click, la imagen no se borra del frontend cuando se recoge, pero si del back por lo que no se puede recoger denuevo (Viendo lo positivo)
 ##### ✅ Cheatcodes (Pausa, K+I+L, I+N+F):
-Funcionan correctamente los 3
+Funcionan correctamente los 3, sin fallas.
 ##### ❌✅🟠 Networking
 ##### ❌✅🟠 Decodificación
 ##### ❌✅🟠 Desencriptación
@@ -51,12 +51,12 @@ Correcto uso de las funciones, cambiandolas a su respectivo funcionamiento con l
 
 
 ## Ejecución :computer:
-El módulo principal de la tarea a ejecutar es  ```main.py``` en cliente y ```main.py``` en servidor
+Para ejecutar cada parte respectivamente de servidor y cliente, se debe abrir ```python main.py``` en servidor y ```python main.py``` en cliente pero dentro de su respectiva carpeta, para que corran las rutas (de sprites, sonidos, laberintos etc) de cada uno correctamente.
 
 
 ## Librerías :books:
 ### Librerías externas utilizadas
-
+Pyqt6 y todos sus derivados
 
 ### Librerías propias
 
@@ -64,8 +64,8 @@ El módulo principal de la tarea a ejecutar es  ```main.py``` en cliente y ```ma
 ## Supuestos y consideraciones adicionales :thinking:
 
 
-1. Especial ojo al movimiento del conejo, funciona bien menos cuando se mantiene apretado el boton, .
-2. Como no se implemento las bombas, el puntaje no cambia de 0 al no poder eliminar lobos, pero la formula del backend funciona (en caso de querer comprobar, cambiar numero de self.lobos_eliminados)
+1. Especial ojo al movimiento del conejo, funciona bien menos cuando se mantiene apretado el boton, por lo que al probar ir apretando una tecla a la vez de movimiento.
+2. Como no se implemento las bombas, el puntaje no cambia de 0.0 al no poder eliminar lobos, pero la formula del backend funciona (en caso de querer comprobar, cambiar numero de self.lobos_eliminados a 1 y la formula dara un puntaje "real")
 3. ...
 
 PD: <una última consideración (de ser necesaria) o comentario hecho anteriormente que se quiera **recalcar**>
