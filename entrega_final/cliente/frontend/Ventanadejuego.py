@@ -10,7 +10,8 @@ from PyQt6.QtMultimedia import QMediaPlayer
 from parametros import (
     DURACION_NIVEL_INICIAL, VELOCIDAD_CONEJO, VELOCIDAD_LOBO, 
     PONDERADOR_LABERINTO_1, PONDERADOR_LABERINTO_2, 
-    PONDERADOR_LABERINTO_3, VELOCIDAD_ZANAHORIA
+    PONDERADOR_LABERINTO_3, VELOCIDAD_ZANAHORIA,
+    PUNTAJE_LOBO, PUNTAJE_INF
 )
 
 class Ventanajuego(QWidget):
@@ -21,6 +22,7 @@ class Ventanajuego(QWidget):
     senal_movimiento_zanahoria = pyqtSignal(list, int, int, int, str)
     senal_borrar_enemigos = pyqtSignal(list)
     senal_recoger = pyqtSignal()
+    senal_puntaje = pyqtSignal(int, int, int, int)
 
     def __init__(self):
         super().__init__()
@@ -35,8 +37,10 @@ class Ventanajuego(QWidget):
         self.conejo_moviendo = False
         self.direccion = ''
         self.lobos = []
+        self.lobos_eliminados = 0
         self.canones = []
         self.vidas = 3
+        self.puntaje_total = 0
         self.player = QMediaPlayer()
         self.inicializarUI()
 
@@ -294,6 +298,13 @@ class Ventanajuego(QWidget):
             else:
                 self.timer.stop()
                 QMessageBox.information(self, "Tiempo agotado", "¡Se acabó el tiempo!")
+                self.actualizar_vidas(self.vidas - 1)
+                self.timer.stop()
+                self.timer_movimiento.stop()
+                self.tiempo_restante = DURACION_NIVEL_INICIAL
+                self.timer.start(1000)
+                self.actualizar_tiempo()
+                
             
 
     def actualizar_tiempo(self):
@@ -343,16 +354,16 @@ class Ventanajuego(QWidget):
 
         elif event.key() == 76 and self.orden_teclas_kil == "KI":  
             self.eliminar_enemigos()
-            self.orden_teclas_kil = ""  
+            self.orden_teclas_kil = ""  # Resetea la secuencia después de activar el evento
         else:
             self.orden_teclas_kil = ""
 
         # Truco: Vidas y tiempo infinito I + N + F
-        if event.key() == 73:  # 73 es el código de la tecla 'I'
+        if event.key() == 73: 
             self.orden_teclas_inf = "I"
-        elif event.key() == 78 and self.orden_teclas_inf == "I":  # 78 es el código de la tecla 'N'
+        elif event.key() == 78 and self.orden_teclas_inf == "I":  
             self.orden_teclas_inf += "N"
-        elif event.key() == 70 and self.orden_teclas_inf == "IN":  # 70 es el código de la tecla 'F'
+        elif event.key() == 70 and self.orden_teclas_inf == "IN":  
             self.activar_modo_infinito()
             self.orden_teclas_inf = ""  # Resetea la secuencia después de activar el evento
         else:
@@ -533,7 +544,7 @@ class Ventanajuego(QWidget):
         
     def actualizar_tablero(self, tablero):
         self.tablero_actual = tablero
-        print(tablero)
+        #print(tablero)
 
     def actualizar_conejo_entrada(self, x, y):
         ruta_imagen = f'entrega_final/cliente/frontend/assets/sprites/conejo_abajo_1.png'
@@ -543,49 +554,57 @@ class Ventanajuego(QWidget):
         self.conejo_posx = 300 + x * self.tamano_celda
         self.conejo_posy = y * self.tamano_celda
     
-    def iniciar_nuevo_nivel(self):
-        # Detener timers de movimiento y otros si es necesario
-        if self.nivel == 3:
-            puntaje = 0
-            self.reproducir_sonido_victoria()
-            QMessageBox.warning(self, "Ganaste!", f"Tu puntaje es:{puntaje}")
-            ###### Guardar puntaje ##########
-            self.cerrar_programa()
+    def iniciar_nuevo_nivel(self, puntaje):
+        
+        if puntaje == 0.1111111:
+            self.senal_puntaje.emit(self.tiempo_restante, self.vidas, self.lobos_eliminados, PUNTAJE_LOBO)
+        else: 
+            if self.modo_inf == True:
+                puntaje = PUNTAJE_INF
+                self.modo_inf = False
+            print(puntaje)
+            self.puntaje_total += puntaje
 
-        self.timer.stop()
-        self.timer_movimiento.stop()
-        for lobo in self.lobos:
-            lobo[-1].stop()  
-        for canon in self.canones:
-            canon[-2].stop()  
+            if self.nivel == 3:
+                self.reproducir_sonido_victoria()
+                QMessageBox.warning(self, "Ganaste!", f"Tu puntaje es:{self.puntaje_total}")
+                ###### Guardar puntaje ##########
+                self.cerrar_programa()
 
-        # Limpiar la lista de lobos y cañones para el nuevo nivel
-        self.lobos.clear()
-        self.canones.clear()
-        self.tablero_actual = []
+            self.timer.stop()
+            self.timer_movimiento.stop()
+            for lobo in self.lobos:
+                lobo[-1].stop()  
+            for canon in self.canones:
+                canon[-2].stop()  
 
-        # Cargar el nuevo tablero
-        self.nivel += 1
+            # Limpiar la lista de lobos y cañones para el nuevo nivel
+            self.lobos.clear()
+            self.canones.clear()
+            self.tablero_actual = []
 
-        # Reiniciar el tiempo
-        self.tiempo_restante = DURACION_NIVEL_INICIAL
-        self.actualizar_tiempo()
+            # Cargar el nuevo tablero
+            self.nivel += 1
 
-        # Reiniciar el timer del juego
-        self.timer.start(1000)
+            # Reiniciar el tiempo
+            self.tiempo_restante = DURACION_NIVEL_INICIAL
+            self.actualizar_tiempo()
 
-        if self.nivel == 1:
-            ponderador = PONDERADOR_LABERINTO_1
-        elif self.nivel == 2:
-            ponderador = PONDERADOR_LABERINTO_2
-        elif self.nivel == 3:
-            ponderador = PONDERADOR_LABERINTO_3
+            # Reiniciar el timer del juego
+            self.timer.start(1000)
 
-        self.tiempo_mov_lobo = (1 / VELOCIDAD_LOBO) * 1000 * ponderador
-        self.timer_movimiento = QTimer(self)
-        self.timer_movimiento.timeout.connect(self.actualizar_sprite_conejo)
+            if self.nivel == 1:
+                ponderador = PONDERADOR_LABERINTO_1
+            elif self.nivel == 2:
+                ponderador = PONDERADOR_LABERINTO_2
+            elif self.nivel == 3:
+                ponderador = PONDERADOR_LABERINTO_3
 
-        self.cargar_mapa()
+            self.tiempo_mov_lobo = (1 / VELOCIDAD_LOBO) * 1000 * ponderador
+            self.timer_movimiento = QTimer(self)
+            self.timer_movimiento.timeout.connect(self.actualizar_sprite_conejo)
+
+            self.cargar_mapa()
 
     def eliminar_enemigos(self):
         # Detiene el movimiento y la generación zanahorias
@@ -615,7 +634,6 @@ class Ventanajuego(QWidget):
         self.layout_inventario.addWidget(label_item)
 
     def reproducir_sonido_victoria(self):
-        print('victoria')
         ruta_sonido = f'entrega_final/cliente/frontend/assets/sonidos/victoria.mp3'
         url_sonido = QUrl.fromLocalFile(ruta_sonido)
         self.player.setSource(url_sonido)
