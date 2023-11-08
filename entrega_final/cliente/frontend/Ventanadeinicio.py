@@ -7,7 +7,7 @@ from PyQt6.QtGui import QPixmap
 class Ventanainicio(QWidget):
 
     senal_enviar_login = pyqtSignal(str)
-    senal_ventana_juego = pyqtSignal(int)
+    senal_ventana_juego = pyqtSignal(str, int)
 
     def __init__(self):
         super().__init__()
@@ -125,14 +125,14 @@ class Ventanainicio(QWidget):
     #Funcion para el boton comenzar partida
     def comenzar_partida(self):
         # Obtiene el nombre de usuario de el QLineEdit para comprobarlo
-        nombre_usuario_txt = self.nombre_usuario.text()
-        self.senal_enviar_login.emit(nombre_usuario_txt)
+        self.nombre = self.nombre_usuario.text()
+        self.senal_enviar_login.emit(self.nombre)
 
     def validacion_completa(self, confirmacion):
         # Llama a la función de validación con el nombre de usuario (logica.py --> backend)
         if confirmacion == True:
             self.close()  # Cierra la ventana actual
-            self.senal_ventana_juego.emit(1)
+            self.senal_ventana_juego.emit(self.nombre, 1)
         else:
             # Muestra un QMessageBox informando que el usuario no es válido, y lo pide denuevo
             QMessageBox.warning(self, "Error de validación", "El formato del nombre de usuario no es válido.\n"

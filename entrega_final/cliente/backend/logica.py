@@ -3,11 +3,13 @@ from PyQt6.QtCore import pyqtSignal, QObject
 class LogicaLogin(QObject):
 
     senal_resultado_login = pyqtSignal(bool)
+    senal_revisar_usuario = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
 
     def validacion_formato(self, nombre:str) -> bool:
+        self.nombre = nombre
         countador_mayusculas = 0
         countador_digitos = 0
 
@@ -22,9 +24,13 @@ class LogicaLogin(QObject):
 
         # Verificar condiciones de mayúsculas, dígitos y longitud
         if countador_mayusculas >= 1 and countador_digitos >= 1 and len(nombre) >= 3 and len(nombre) <= 16:
-            self.senal_resultado_login.emit(True)
+            self.senal_revisar_usuario.emit(nombre)
         else:
             self.senal_resultado_login.emit(False)
+    
+    def validacion_usuario(self, valido: bool) -> bool:
+        if valido:
+            self.senal_resultado_login.emit(True)
     
 
 class LogicaJuego(QObject):
