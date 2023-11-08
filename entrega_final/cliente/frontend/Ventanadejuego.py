@@ -24,6 +24,7 @@ class Ventanajuego(QWidget):
     senal_recoger = pyqtSignal()
     senal_puntaje = pyqtSignal(int, int, int, int)
     senal_guardar_puntaje = pyqtSignal(str, int, int, int)
+    
 
     def __init__(self):
         super().__init__()
@@ -538,7 +539,7 @@ class Ventanajuego(QWidget):
             self.label_vidas.setText(f"Vidas restantes: {vidas}")
             if self.vidas == 0:
                 QMessageBox.warning(self, "Perdio", "No le quedan vidas")
-                ########### Guardar puntaje ##########
+                self.senal_guardar_puntaje.emit(self.nombre, self.puntaje_total, self.nivel - 1, self.vidas)
                 self.cerrar_programa()
         else:
             pass
@@ -567,13 +568,13 @@ class Ventanajuego(QWidget):
             if self.modo_inf == True:
                 puntaje = PUNTAJE_INF
                 self.modo_inf = False
-            print(puntaje)
+            
             self.puntaje_total += puntaje
 
             if self.nivel == 3:
                 self.reproducir_sonido_victoria()
                 QMessageBox.warning(self, "Ganaste!", f"Tu puntaje es:{self.puntaje_total}")
-                ###### Guardar puntaje ##########
+                self.senal_guardar_puntaje.emit(self.nombre, self.puntaje_total, self.nivel, self.vidas)
                 self.cerrar_programa()
 
             self.timer.stop()
@@ -646,7 +647,7 @@ class Ventanajuego(QWidget):
         
     def cerrar_programa(self):
         # Cierra el programa cuando se apreta el boton salir
-        self.senal_guardar_puntaje.emit(self.nombre, 0, self.nivel - 1, self.vidas)
+        self.senal_guardar_puntaje.emit(self.nombre, self.puntaje_total, self.nivel - 1, self.vidas)
         self.close()  
         QApplication.instance().quit()  
     

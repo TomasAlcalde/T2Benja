@@ -11,67 +11,61 @@ Un buen ```README.md``` no tiene por que ser muy extenso tampoco, hay que ser **
 
 ## Consideraciones generales :octocat:
 
-<Descripción de lo que hace y que **_no_** hace la tarea que entregaron junto
-con detalles de último minuto y consideraciones como por ejemplo cambiar algo
-en cierta línea del código o comentar una función>
+Abre la ventana de inicio, recibe un username y lo corrige para ver si esta malo, ademas de mostrar el salon de la fama actualizado al servidor. Al poner un username con las especificaciones correctas, se abre la ventana de juego, donde se puede ver que se puede mover el conejo con las teclas WASD, se mueven los lobos y las zanahorias (de los canones) a sus velocidades correspondientes, se puede poner pausa con la letra P, se pueden recoger objetos con la letra G, se puede poner los trucos "K + I + L" y "I + N + F". El conejo choca con las paredes por lo que no lo permite moverse mas alla, cuando choca con un lobo o zanahoria, se le resta una vida y vuelve al inicio, al acabarse el tiempo pierde una vida (no logre que volviera al principio) y tira un mensaje de que se le acabo el tiempo. Todo esta hecho en base a señales entre frontend y backend para el manejo de la logica del juego y los elementos graficos del juego, en donde podemos ver que el frontend tiene todo lo requerido, botones de pausa y salir (funcionales), inventario que se actualiza, vidas que se actualizan, tiempo que se actualiza y el tablero que tambien se actualiza. En relacion al uso de objetos, no logre que funcionara ni la bomba de manzana ni la bomba de congelacion, al pasar un nivel se pasa directamente al siguiente guardando el puntaje en el servidor (el cual lamentablemente al no poder eliminar lobos por el mal funcionamiento de la bomba de manzana, siempre da 0.0 (a menos que se este en modo INF)). En caso de salirse a la mitad guarda el ultimo puntaje del ultimo nivel, cuando se pasa el ultimo nivel termina el juego y guarda el puntaje total, mostrando un mensaje de que ganaste. 
+
+Los sonidos estan implementados pero no funcionan bien.
 
 ### Cosas implementadas y no implementadas :white_check_mark: :x:
 
-Explicación: mantén el emoji correspondiente, de manera honesta, para cada item. Si quieres, también puedes agregarlos a los títulos:
-- ❌ si **NO** completaste lo pedido
-- ✅ si completaste **correctamente** lo pedido
-- 🟠 si el item está **incompleto** o tiene algunos errores
-
-**⚠️⚠️NO BASTA CON SOLO PONER EL COLOR DE LO IMPLEMENTADO**,
-SINO QUE SE DEBERÁ EXPLICAR QUÉ SE REALIZO DETALLADAMENTE EN CADA ITEM.
-⚠️⚠️
 
 #### Entrega Final: 46 pts (75%)
-##### ❌✅🟠 Ventana Inicio
-##### ❌✅🟠 Ventana Juego
-##### ❌✅🟠 ConejoChico
-##### ❌✅🟠 Lobos
-##### ❌✅🟠 Cañón de Zanahorias
-##### ❌✅🟠 Bomba Manzana
-##### ❌✅🟠 Bomba Congeladora
-##### ❌✅🟠 Fin del nivel
-##### ❌✅🟠 Fin del Juego
-##### ❌✅🟠 Recoger (G)
-##### ❌✅🟠 Cheatcodes (Pausa, K+I+L, I+N+F)
+##### ✅ Ventana Inicio: 
+Se visualiza correctamente la ventana mostrando lo solicitado en donde el salon de fama se actualiza, las validaciones son cliente servidor notificando en caso de que no se cumpla algo. El boton salir cierra la ventana y termina el programa.
+##### ✅🟠 Ventana Juego:
+Se cargan correctamente los archivos del laberinto, se visualiza todo correctame lo que piden (exceptuando que al recoger un objeto este se elimina del backend pero no del frontend). Las estadisticas de tiempo, vidas, puntaje, etc se van actualizando a medida que el juego progresa, el boton de salir funciona correctamente.
+##### 🟠 ConejoChico:
+Cuando colisiona el conejo con un lobo o una zanahoria este pierde una vida y vuelve al principio (hay cierto margen de error en la colision, por lo tanto hay veces que "toca" y no se muere el conejo).
+El movimiento de conejo chico es fluido y se detiene al chocar con la pared (tiene un pequeño error que cuando se mantiene apretado la tecla para avanzar, el frontend no alcanza a recibir tan rapido la actualizacion, por lo que descuadra del camino), pero si se hace apretando la direccion para moverse tecla por tecla (con un margen de unos 0.5 segundos por cada click) no deberia descarrilarse y seguiria el camino de manera correcta. Siempre este avanzara a la direccion y un movimiento por cada tecla correspondiente, si el tiempo se agota este pierde una vida, pero no vuelve a su parte inicial.
+##### ✅ Lobos:
+Funcionan correctamente, tienen direccion y velocidades individuales
+##### ✅ Cañón de Zanahorias:
+Funcionan correctamente, tienen dirrecion dependiendo de donde apunte y se mueven de manera independiente.
+##### ❌ Bomba Manzana:
+No implementado, sin embargo se muestra el objeto en el inventario cuando se apreta g encima de uno de ellos.
+##### ❌ Bomba Congeladora:
+No implementado, pero lo mismo que la anterior
+##### ✅ Fin del nivel:
+Implementadas ambas formas de terminar el nivel, unicamente al pasar de nivel se manda la info al servidor y se actualiza en puntaje.txt
+##### ✅🟠 Fin del Juego: 
+Se notifica con el mensaje y se muestra el puntaje total, aunque este implementado el sonido no suena.
+##### 🟠 Recoger (G):
+Funciona recoger objetos pero no ponerlos con el click
+##### ✅ Cheatcodes (Pausa, K+I+L, I+N+F):
+Funcionan correctamente los 3
 ##### ❌✅🟠 Networking
 ##### ❌✅🟠 Decodificación
 ##### ❌✅🟠 Desencriptación
 ##### ❌✅🟠 Archivos
-##### ❌✅🟠 Funciones
+##### ✅ Funciones:
+Correcto uso de las funciones, cambiandolas a su respectivo funcionamiento con las clases y el manejo de senales entre backend y frontend
 
 
 ## Ejecución :computer:
-El módulo principal de la tarea a ejecutar es  ```archivo.py```. Además se debe crear los siguientes archivos y directorios adicionales:
-1. ```archivo.ext``` en ```ubicación```
-2. ```directorio``` en ```ubicación```
-3. ...
+El módulo principal de la tarea a ejecutar es  ```main.py``` en cliente y ```main.py``` en servidor
 
 
 ## Librerías :books:
 ### Librerías externas utilizadas
-La lista de librerías externas que utilicé fue la siguiente:
 
-1. ```librería_1```: ```función() / módulo```
-2. ```librería_2```: ```función() / módulo``` (debe instalarse)
-3. ...
 
 ### Librerías propias
-Por otro lado, los módulos que fueron creados fueron los siguientes:
 
-1. ```librería_1```: Contiene a ```ClaseA```, ```ClaseB```, (ser general, tampoco es necesario especificar cada una)...
-2. ```librería_2```: Hecha para <insertar descripción **breve** de lo que hace o qué contiene>
-3. ...
 
 ## Supuestos y consideraciones adicionales :thinking:
-Los supuestos que realicé durante la tarea son los siguientes:
 
-1. <Descripción/consideración 1 y justificación del por qué es válido/a> 
-2. <Descripción/consideración 2 y justificación del por qué es válido/a>
+
+1. Especial ojo al movimiento del conejo, funciona bien menos cuando se mantiene apretado el boton, .
+2. Como no se implemento las bombas, el puntaje no cambia de 0 al no poder eliminar lobos, pero la formula del backend funciona (en caso de querer comprobar, cambiar numero de self.lobos_eliminados)
 3. ...
 
 PD: <una última consideración (de ser necesaria) o comentario hecho anteriormente que se quiera **recalcar**>
