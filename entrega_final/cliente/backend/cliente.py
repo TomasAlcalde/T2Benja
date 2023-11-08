@@ -12,8 +12,9 @@ class Cliente(QObject):
     senal_aceptar = pyqtSignal(str)
     senal_j1_listo = pyqtSignal(int, str)
     senal_fin = pyqtSignal(str)
-    senal_cerrar_ventana_inicio = pyqtSignal(bool)
+    senal_cerrar_ventana_inicio = pyqtSignal(bool, str, int, int, int)
     senal_error_verificacion = pyqtSignal()
+    senal_actualizar_puntajes = pyqtSignal(list)
 
     def __init__(self):
         super().__init__()
@@ -45,6 +46,7 @@ class Cliente(QObject):
         self.socket_cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket_cliente.connect((self.host, self.port))
         print("Conectado")
+        self.actualizar_puntajes()
     
     def verificar(self, nombre):
         print(nombre)
@@ -59,6 +61,14 @@ class Cliente(QObject):
         msg = {}
         msg["comando"] = "guardar"
         msg["argumento"] = [nombre, puntaje, nivel, vidas]
+        mensaje_bytes = self.codificar_mensaje(msg)
+        largo_mensaje = len(mensaje_bytes).to_bytes(4, byteorder="big")
+        self.socket_cliente.sendall(largo_mensaje + mensaje_bytes)
+
+    def actualizar_puntajes(self):
+        print("actualizando puntajes")
+        msg = {}
+        msg["comando"] = "puntajes"
         mensaje_bytes = self.codificar_mensaje(msg)
         largo_mensaje = len(mensaje_bytes).to_bytes(4, byteorder="big")
         self.socket_cliente.sendall(largo_mensaje + mensaje_bytes)
@@ -107,6 +117,11 @@ class Cliente(QObject):
         if comando == "verificacion":
             if recibido["argumento"]:
                 nombre = recibido["nombre"]
-                self.senal_cerrar_ventana_inicio.emit(True)
+                nivel = recibido["nivel"]
+                puntaje = recibido["puntaje"]
+                vidas = recibido["vidas"]
+                self.senal_cerrar_ventana_inicio.emit(True, nombre, nivel, puntaje, vidas)
             else:
                 self.senal_error_verificacion.emit()
+        if comando == "puntajes":
+            self.senal_actualizar_puntajes.emit(recibido["argumento"])

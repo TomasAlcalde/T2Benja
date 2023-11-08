@@ -4,6 +4,7 @@ class LogicaLogin(QObject):
 
     senal_resultado_login = pyqtSignal(bool)
     senal_revisar_usuario = pyqtSignal(str)
+    senal_pasar_datos_juego = pyqtSignal(str, int, int, int)
 
     def __init__(self):
         super().__init__()
@@ -28,9 +29,10 @@ class LogicaLogin(QObject):
         else:
             self.senal_resultado_login.emit(False)
     
-    def validacion_usuario(self, valido: bool) -> bool:
+    def validacion_user_existente(self, valido: bool, nombre: str, nivel: int, puntaje: int, vidas: int) -> bool:
         if valido:
             self.senal_resultado_login.emit(True)
+            self.senal_pasar_datos_juego.emit(nombre, nivel, puntaje, vidas)
     
 
 class LogicaJuego(QObject):
