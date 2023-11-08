@@ -8,6 +8,7 @@ class Ventanainicio(QWidget):
 
     senal_enviar_login = pyqtSignal(str)
     senal_ventana_juego = pyqtSignal(str, int)
+    senal_actualizar_puntajes = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -80,7 +81,7 @@ class Ventanainicio(QWidget):
 
         # Logo de DCConejoChico
         self.logo = QLabel(self)
-        self.pixmap = QPixmap('entrega_final/cliente/frontend/assets/sprites/logo.png')
+        self.pixmap = QPixmap('frontend/assets/sprites/logo.png')
         self.logo.setPixmap(self.pixmap)
         self.logo.move(0, 80)
 
@@ -127,6 +128,15 @@ class Ventanainicio(QWidget):
         # Obtiene el nombre de usuario de el QLineEdit para comprobarlo
         self.nombre = self.nombre_usuario.text()
         self.senal_enviar_login.emit(self.nombre)
+    
+    def actualizar_puntajes(self, puntajes):
+        punt1 = f"1. {puntajes[0][0]} - {puntajes[0][1]}\n"
+        punt2 = f"2. {puntajes[1][0]} - {puntajes[1][1]}\n"
+        punt3 = f"3. {puntajes[2][0]} - {puntajes[2][1]}\n"
+        punt4 = f"4. {puntajes[3][0]} - {puntajes[3][1]}\n"
+        punt5 = f"5. {puntajes[4][0]} - {puntajes[4][1]}\n"
+        print("ACTUALIZADO")
+        self.puntajes.setText(punt1 + punt2 + punt3 + punt4 + punt5)
 
     def validacion_completa(self, confirmacion):
         # Llama a la función de validación con el nombre de usuario (logica.py --> backend)
@@ -135,9 +145,10 @@ class Ventanainicio(QWidget):
             self.senal_ventana_juego.emit(self.nombre, 1)
         else:
             # Muestra un QMessageBox informando que el usuario no es válido, y lo pide denuevo
-            QMessageBox.warning(self, "Error de validación", "El formato del nombre de usuario no es válido.\n"
-                                                            "Asegúrate de que tenga al menos una mayúscula, "
-                                                            "un dígito y entre 3 y 16 caracteres.")
+            QMessageBox.warning(self, "Error de validación", 
+                                "El formato del nombre de usuario no es válido.\n"
+                                "Asegúrate de que tenga al menos una mayúscula, "
+                                "un dígito y entre 3 y 16 caracteres.")
     
     #Funcion para el boton salir
     def cerrar_programa(self):

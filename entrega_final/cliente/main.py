@@ -18,6 +18,7 @@ if __name__ == '__main__':
 
     ventana_inicio.senal_enviar_login.connect(logica_login.validacion_formato)
     logica_login.senal_resultado_login.connect(ventana_inicio.validacion_completa)
+    logica_login.senal_pasar_datos_juego.connect(ventana_juego.recibir_datos)
     logica_login.senal_revisar_usuario.connect(cliente.verificar)
     ventana_inicio.senal_ventana_juego.connect(ventana_juego.abrir_ventana)
     ventana_juego.senal_tecla_movimiento.connect(logica_juego.validar_direccion)
@@ -35,4 +36,7 @@ if __name__ == '__main__':
     ventana_juego.senal_puntaje.connect(logica_juego.calcular_puntaje)
     logica_juego.senal_resultado_puntaje.connect(ventana_juego.iniciar_nuevo_nivel)
     cliente.senal_cerrar_ventana_inicio.connect(logica_login.validacion_usuario)
+    cliente.senal_cerrar_ventana_inicio.connect(logica_login.validacion_user_existente)
+    ventana_inicio.senal_actualizar_puntajes.connect(cliente.actualizar_puntajes)
+    cliente.senal_actualizar_puntajes.connect(ventana_inicio.actualizar_puntajes)
     sys.exit(app.exec())

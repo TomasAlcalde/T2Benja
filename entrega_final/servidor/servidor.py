@@ -100,15 +100,23 @@ class Servidor:
             respuesta["comando"] = "verificacion"
             respuesta["argumento"] = estado
             respuesta["nombre"] = nombre
-            if estado:
+            if not estado:
                 self.enviar(respuesta, socket_cliente)
                 print(f"El nombre de usuario: {nombre} se encuentra bloqueado")
             else:
+                nivel, puntaje, vidas = self.buscar_nivel_guardado(nombre)
+                respuesta["nivel"] = nivel
+                respuesta["puntaje"] = puntaje
+                respuesta["vidas"] = vidas
                 self.enviar(respuesta, socket_cliente)
-                print(f"{nombre} no es válido")
+                print(f"{nombre} es válido")
         if comando == "guardar":
             self.guardar_puntaje(recibido["argumento"])
-
+        if comando == "puntajes":
+            print("buscando puntajes")
+            respuesta["comando"] = "puntajes"
+            respuesta["argumento"] = self.mostrar_records()
+            self.enviar(respuesta, socket_cliente)
 
     def verificar_usuario(self, info):
         nombre = info[0]
@@ -133,5 +141,30 @@ class Servidor:
         print(f"Se ha registrado el puntaje para el usuario {nombre}: {puntaje}")
     
     def mostrar_records(self):
-        pass
+        n = 5
+        puntajes = self.leer_puntajes()
+        if len(puntajes) < 5:
+            n = len(puntajes)
+        puntajes_ordenados = sorted(puntajes, key=lambda x: x[1], reverse=True)
+        mejores_puntajes = puntajes_ordenados[:n]
+        if len(mejores_puntajes) < 5:
+            mejores_puntajes += [("", 0)] * (5 - len(mejores_puntajes))
+        return mejores_puntajes
+
+    def buscar_nivel_guardado(self, nombre):
+        with open("puntajes.txt", "r") as archivo:
+            lineas = archivo.readlines()
+        for linea in lineas:
+            datos = linea.strip().split()
+            if datos[0] == nombre and datos[2] < 3 and datos[3] > 0:
+                return datos[2], datos[1], datos[3]
+        return 1, 0, 3
+    
+    def leer_puntajes(self):
+        puntajes = []
+        with open("puntajes.txt", "r") as archivo:
+            for linea in archivo:
+                nombre, puntaje, nivel, vidas = linea.strip().split()
+                puntajes.append((nombre, int(puntaje)))
+        return puntajes
 

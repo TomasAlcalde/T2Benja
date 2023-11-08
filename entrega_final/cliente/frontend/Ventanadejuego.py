@@ -156,8 +156,11 @@ class Ventanajuego(QWidget):
         self.timer_movimiento = QTimer(self)
         self.timer_movimiento.timeout.connect(self.actualizar_sprite_conejo)
 
-        
         self.cargar_mapa()
+
+    def recibir_datos(self, nombre, lvl, puntaje, vidas):
+        self.vidas = vidas
+        self.abrir_ventana(nombre, lvl)
 
     def cargar_mapa(self):
         # Lee la ruta del archivo segun el nivel en el que este se encuentre
@@ -205,7 +208,7 @@ class Ventanajuego(QWidget):
                 d = 'derecha'
             elif canon[0] == "CL":
                 d = 'izquierda'
-            ruta_imagen = f'entrega_final/cliente/frontend/assets/sprites/zanahoria_{d}'
+            ruta_imagen = f'frontend/assets/sprites/zanahoria_{d}'
             pixmap_item = QPixmap(ruta_imagen).scaled(self.tamano_celda, self.tamano_celda)
             label.setPixmap(pixmap_item)
             label.setGeometry(300 + x * self.tamano_celda, y * self.tamano_celda, self.tamano_celda, self.tamano_celda)
@@ -511,7 +514,7 @@ class Ventanajuego(QWidget):
         # Incrementa el índice del sprite y reinicia si es necesario
         lobo[6] = (lobo[6] + 1) % 3 + 1
         if lobo[0] == "LH":
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/lobo_horizontal_{direccion}_{lobo[6]}.png'
+            ruta_sprite = f'frontend/assets/sprites/lobo_horizontal_{direccion}_{lobo[6]}.png'
         else:
             ruta_sprite = f'frontend/assets/sprites/lobo_vertical_{direccion}_{lobo[6]}.png'
         pixmap_lobo = QPixmap(ruta_sprite).scaled(960 // 16, 960 // 16)
@@ -636,7 +639,7 @@ class Ventanajuego(QWidget):
         self.layout_inventario.addWidget(label_item)
 
     def reproducir_sonido_victoria(self):
-        ruta_sonido = f'entrega_final/cliente/frontend/assets/sonidos/victoria.mp3'
+        ruta_sonido = f'frontend/assets/sonidos/victoria.mp3'
         url_sonido = QUrl.fromLocalFile(ruta_sonido)
         self.player.setSource(url_sonido)
         self.player.play()
