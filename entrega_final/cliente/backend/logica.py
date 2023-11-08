@@ -38,9 +38,10 @@ class LogicaJuego(QObject):
     senal_resultado_movimiento = pyqtSignal(list, str, bool, str)
     senal_resultado_movimiento_lobo = pyqtSignal(list, int, str, bool, str)
     senal_resultado_movimiento_zanahoria = pyqtSignal(list, int, int, int, int, str, str)
-    senal_nuevo_nivel = pyqtSignal()
+    senal_nuevo_nivel = pyqtSignal(float)
     senal_resultado_borrar = pyqtSignal(list)
     senal_resultado_recoger = pyqtSignal(str)
+    senal_resultado_puntaje = pyqtSignal(float)
 
     def __init__(self):
         super().__init__()
@@ -58,7 +59,7 @@ class LogicaJuego(QObject):
         if tecla == 'W':
             # Movimiento hacia arriba
             if laberinto[conejo_y - 1][conejo_x] == 'S':
-                self.senal_nuevo_nivel.emit()
+                self.senal_nuevo_nivel.emit(0.1111111) #Numero arbitrario antes de calcular puntaje
             elif conejo_y > 0 and (laberinto[conejo_y - 1][conejo_x] == 'LV' or laberinto[conejo_y - 1][conejo_x] == 'LH' or laberinto[conejo_y - 1][conejo_x] == 'Z'):
                 for y in range(16):
                     for x in range(16):
@@ -89,7 +90,7 @@ class LogicaJuego(QObject):
             # Movimiento hacia la izquierda
             
             if conejo_x > 0 and laberinto[conejo_y][conejo_x -1] == 'S':
-                self.senal_nuevo_nivel.emit()
+                self.senal_nuevo_nivel.emit(0.1111111) #Numero arbitrario antes de calcular puntaje
             elif conejo_x > 0 and (laberinto[conejo_y][conejo_x -1] == 'LV' or laberinto[conejo_y][conejo_x-1] == 'LH' or laberinto[conejo_y][conejo_x-1] == 'Z'):
                 for y in range(16):
                     for x in range(16):
@@ -120,7 +121,7 @@ class LogicaJuego(QObject):
         elif tecla == 'S':
             # Movimiento hacia abajo
             if conejo_y < len(laberinto) - 1 and laberinto[conejo_y+1][conejo_x] == 'S':
-                self.senal_nuevo_nivel.emit()
+                self.senal_nuevo_nivel.emit(0.1111111) #Numero arbitrario antes de calcular puntaje
             elif conejo_y < len(laberinto) - 1 and (laberinto[conejo_y+1][conejo_x] == 'LV' or laberinto[conejo_y+1][conejo_x] == 'LH' or laberinto[conejo_y+1][conejo_x] == 'Z'):
                 for y in range(16):
                     for x in range(16):
@@ -150,7 +151,7 @@ class LogicaJuego(QObject):
         elif tecla == 'D':
             # Movimiento hacia la derecha
             if laberinto[conejo_y][conejo_x+1] == 'S':
-                self.senal_nuevo_nivel.emit()
+                self.senal_nuevo_nivel.emit(0.1111111) #Numero arbitrario antes de calcular puntaje
             elif conejo_x < len(laberinto) - 1 and (laberinto[conejo_y][conejo_x+1] == 'LV' or laberinto[conejo_y][conejo_x+1] == 'LH' or laberinto[conejo_y][conejo_x+1] == 'Z'):
                 for y in range(16):
                     for x in range(16):
@@ -299,7 +300,6 @@ class LogicaJuego(QObject):
             d = 'arriba'
             for i in range(y):
                 z = y-1-i
-                print(z)
                 if laberinto[z][x] == 'Z':
                     zanahoria = 1
                     if laberinto[z-1][x] == 'P':
@@ -419,13 +419,13 @@ class LogicaJuego(QObject):
     
 
 
-def calcular_puntaje(tiempo: int, vidas: int, cantidad_lobos: int, PUNTAJE_LOBO: int) -> float:
-    if cantidad_lobos == 0 or PUNTAJE_LOBO == 0:
-        return 0.0
-    puntaje_nivel = (tiempo * vidas) / (cantidad_lobos * PUNTAJE_LOBO)
-    puntaje_nivel = round(puntaje_nivel, 2)  # Redondear a dos decimales
-    
-    return puntaje_nivel
+    def calcular_puntaje(self, tiempo: int, vidas: int, cantidad_lobos: int, PUNTAJE_LOBO: int) -> float:
+        if cantidad_lobos == 0 or PUNTAJE_LOBO == 0:
+            self.senal_resultado_puntaje.emit(0.0)
+        else:
+            puntaje_nivel = (tiempo * vidas) / (cantidad_lobos * PUNTAJE_LOBO)
+            puntaje_nivel = round(puntaje_nivel, 2)  # Redondear a dos decimales
+            self.senal_resultado_puntaje.emit(puntaje_nivel)
     
 
 

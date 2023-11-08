@@ -12,7 +12,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     ventana_inicio = Ventanainicio()
     ventana_juego = Ventanajuego()
-
     logica_login = LogicaLogin()
     logica_juego = LogicaJuego()
     cliente = Cliente()
@@ -33,5 +32,7 @@ if __name__ == '__main__':
     logica_juego.senal_resultado_borrar.connect(ventana_juego.actualizar_tablero)
     ventana_juego.senal_recoger.connect(logica_juego.recoger_item)
     logica_juego.senal_resultado_recoger.connect(ventana_juego.anadir_item)
+    ventana_juego.senal_puntaje.connect(logica_juego.calcular_puntaje)
+    logica_juego.senal_resultado_puntaje.connect(ventana_juego.iniciar_nuevo_nivel)
     cliente.senal_cerrar_ventana_inicio.connect(logica_login.validacion_usuario)
     sys.exit(app.exec())
