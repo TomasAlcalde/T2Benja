@@ -3,7 +3,8 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdi
 from PyQt6.QtGui import QPixmap
 from frontend.Ventanadeinicio import Ventanainicio
 from frontend.Ventanadejuego import Ventanajuego
-from backend.logica import LogicaLogin, LogicaJuego
+from backend.logica import LogicaJuego
+from backend.logica_login import LogicaLogin
 from backend.cliente import Cliente
 
 
@@ -35,7 +36,6 @@ if __name__ == '__main__':
     logica_juego.senal_resultado_recoger.connect(ventana_juego.anadir_item)
     ventana_juego.senal_puntaje.connect(logica_juego.calcular_puntaje)
     logica_juego.senal_resultado_puntaje.connect(ventana_juego.iniciar_nuevo_nivel)
-    cliente.senal_cerrar_ventana_inicio.connect(logica_login.validacion_usuario)
     cliente.senal_cerrar_ventana_inicio.connect(logica_login.validacion_user_existente)
     ventana_inicio.senal_actualizar_puntajes.connect(cliente.actualizar_puntajes)
     cliente.senal_actualizar_puntajes.connect(ventana_inicio.actualizar_puntajes)

@@ -129,7 +129,7 @@ class Ventanajuego(QWidget):
 
         # Objetos
         self.layout_inventario = QVBoxLayout()
-        self.layout_inventario.setContentsMargins(10, 50, 10, 10)  # Los valores exactos dependen de tu diseño
+        self.layout_inventario.setContentsMargins(10, 50, 10, 10)
         self.layout_inventario.setSpacing(10)
         self.label_inventario_fondo.setLayout(self.layout_inventario)
 
@@ -211,7 +211,8 @@ class Ventanajuego(QWidget):
             ruta_imagen = f'frontend/assets/sprites/zanahoria_{d}'
             pixmap_item = QPixmap(ruta_imagen).scaled(self.tamano_celda, self.tamano_celda)
             label.setPixmap(pixmap_item)
-            label.setGeometry(300 + x * self.tamano_celda, y * self.tamano_celda, self.tamano_celda, self.tamano_celda)
+            label.setGeometry(300 + x * self.tamano_celda, y * self.tamano_celda, 
+                              self.tamano_celda, self.tamano_celda)
             label.hide()
             canon.append(label)
             
@@ -268,7 +269,8 @@ class Ventanajuego(QWidget):
             if simbolo == "C":
                 self.conejo_label = QLabel(self)
                 self.conejo_label.setPixmap(pixmap_item)
-                self.conejo_label.setGeometry(300 + x * tamano_celda, y * tamano_celda, tamano_celda, tamano_celda)
+                self.conejo_label.setGeometry(300 + x * tamano_celda, y * tamano_celda, 
+                                              tamano_celda, tamano_celda)
                 self.conejo_posx = 300 + x * tamano_celda 
                 self.conejo_posy = y * tamano_celda
                 self.conejo_label.show()
@@ -278,20 +280,24 @@ class Ventanajuego(QWidget):
                 elif simbolo == "LH":
                     d = "derecha"
                 label = QLabel(self)
-                self.lobos.append([simbolo, 300 + x * tamano_celda, y*tamano_celda, x, y, d, 1, label])
+                self.lobos.append([simbolo, 300 + x * tamano_celda, y*tamano_celda, 
+                                   x, y, d, 1, label])
                 label.setPixmap(pixmap_item)
-                label.setGeometry(300 + x * tamano_celda, y * tamano_celda, tamano_celda, tamano_celda)
+                label.setGeometry(300 + x * tamano_celda, y * tamano_celda, 
+                                  tamano_celda, tamano_celda)
                 label.show()
             elif simbolo == "CU" or simbolo == "CD" or simbolo == "CR" or simbolo == "CL":
                 label = QLabel(self)
                 self.canones.append([simbolo, 300 + x * tamano_celda, y*tamano_celda, x, y])
                 label.setPixmap(pixmap_item)
-                label.setGeometry(300 + x * tamano_celda, y * tamano_celda, tamano_celda, tamano_celda)
+                label.setGeometry(300 + x * tamano_celda, y * tamano_celda, 
+                                  tamano_celda, tamano_celda)
                 label.show()
             else:
                 label = QLabel(self)
                 label.setPixmap(pixmap_item)
-                label.setGeometry(300 + x * tamano_celda, y * tamano_celda, tamano_celda, tamano_celda)
+                label.setGeometry(300 + x * tamano_celda, y * tamano_celda, 
+                                  tamano_celda, tamano_celda)
                 label.show()
         
     def contador_tiempo(self):
@@ -410,7 +416,7 @@ class Ventanajuego(QWidget):
             self.direccion = letra
             self.conejo_moviendo = True
             self.conejo_index = 1  # Reinicia el índice del sprite
-            self.timer_movimiento.start(int(self.tiempo_mov // 4))  # Inicia el temporizador para la animación
+            self.timer_movimiento.start(int(self.tiempo_mov // 4)) 
                 
     def actualizar_sprite_conejo(self):
         if not self.conejo_moviendo:
@@ -459,7 +465,8 @@ class Ventanajuego(QWidget):
     def intentarmover_lobo(self, indice_lobo):
         lobo = self.lobos[indice_lobo]
         direccion_actual = lobo[5]  
-        self.senal_movimiento_lobo.emit(self.tablero_actual, indice_lobo, lobo[3], lobo[4], direccion_actual)
+        self.senal_movimiento_lobo.emit(self.tablero_actual, indice_lobo, lobo[3], lobo[4], 
+                                        direccion_actual)
 
     def intentar_mover_lobo_con_indice(self, indice_lobo):
         self.intentarmover_lobo(indice_lobo)
@@ -494,7 +501,8 @@ class Ventanajuego(QWidget):
         
     def disparar_zanahoria(self, indice_canon):
         canon = self.canones[indice_canon]
-        self.senal_movimiento_zanahoria.emit(self.tablero_actual, indice_canon, canon[3], canon[4], canon[0])
+        self.senal_movimiento_zanahoria.emit(self.tablero_actual, indice_canon, 
+                                             canon[3], canon[4], canon[0])
 
     def mover_zanahoria(self, tablero, indice, x, y, status, direccion, conejo):
         self.tablero_actual = tablero
@@ -521,7 +529,8 @@ class Ventanajuego(QWidget):
         lobo_label = lobo[7]  
         lobo_label.setPixmap(pixmap_lobo)
         # Actualiza la posición del QLabel del lobo
-        lobo_label.setGeometry(300 + lobo[3] * (960 // 16), lobo[4] * (960 // 16), 960 // 16, 960 // 16)
+        lobo_label.setGeometry(300 + lobo[3] * (960 // 16), lobo[4] * (960 // 16), 
+                               960 // 16, 960 // 16)
         lobo_label.raise_()
 
     def actualizar_sprite_zanahoria(self, indice_canon, x, y, status, direccion):
@@ -555,14 +564,16 @@ class Ventanajuego(QWidget):
         ruta_imagen = f'frontend/assets/sprites/conejo_abajo_1.png'
         pixmap_item = QPixmap(ruta_imagen).scaled(self.tamano_celda, self.tamano_celda)
         self.conejo_label.setPixmap(pixmap_item)
-        self.conejo_label.setGeometry(300 + x * self.tamano_celda, y * self.tamano_celda, self.tamano_celda, self.tamano_celda)
+        self.conejo_label.setGeometry(300 + x * self.tamano_celda, y * self.tamano_celda, 
+                                      self.tamano_celda, self.tamano_celda)
         self.conejo_posx = 300 + x * self.tamano_celda
         self.conejo_posy = y * self.tamano_celda
     
     def iniciar_nuevo_nivel(self, puntaje):
         
         if puntaje == 0.1111111:
-            self.senal_puntaje.emit(self.tiempo_restante, self.vidas, self.lobos_eliminados, PUNTAJE_LOBO)
+            self.senal_puntaje.emit(self.tiempo_restante, self.vidas, 
+                                    self.lobos_eliminados, PUNTAJE_LOBO)
         else: 
             if self.modo_inf == True:
                 puntaje = PUNTAJE_INF
@@ -635,7 +646,7 @@ class Ventanajuego(QWidget):
         
         # Crea un QLabel con el texto y lo agrega al layout del inventario
         label_item = QLabel(texto_item)
-        label_item.setStyleSheet("color: #FF1493; font-size: 14px;")  # Estilo del texto, puede ser modificado según necesidad
+        label_item.setStyleSheet("color: #FF1493; font-size: 14px;") 
         self.layout_inventario.addWidget(label_item)
 
     def reproducir_sonido_victoria(self):
@@ -650,7 +661,6 @@ class Ventanajuego(QWidget):
         self.close()  
         QApplication.instance().quit()  
     
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
