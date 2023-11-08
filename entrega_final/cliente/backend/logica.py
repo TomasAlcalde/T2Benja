@@ -34,9 +34,12 @@ class LogicaJuego(QObject):
     senal_resultado_movimiento_zanahoria = pyqtSignal(list, int, int, int, int, str, str)
     senal_nuevo_nivel = pyqtSignal()
     senal_resultado_borrar = pyqtSignal(list)
+    senal_resultado_recoger = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
+        self.objeto_bajo_conejo = None
+        self.inventario = []
 
     def validar_direccion(self, laberinto: list, tecla: str) -> (list, str, bool, str):
         conejo_x, conejo_y = -1, -1
@@ -46,10 +49,11 @@ class LogicaJuego(QObject):
                 conejo_y = fila
                 break
 
-
         if tecla == 'W':
             # Movimiento hacia arriba
-            if conejo_y > 0 and (laberinto[conejo_y - 1][conejo_x] == 'LV' or laberinto[conejo_y - 1][conejo_x] == 'LH' or laberinto[conejo_y - 1][conejo_x] == 'Z'):
+            if laberinto[conejo_y - 1][conejo_x] == 'S':
+                self.senal_nuevo_nivel.emit()
+            elif conejo_y > 0 and (laberinto[conejo_y - 1][conejo_x] == 'LV' or laberinto[conejo_y - 1][conejo_x] == 'LH' or laberinto[conejo_y - 1][conejo_x] == 'Z'):
                 for y in range(16):
                     for x in range(16):
                         if laberinto[y][x] == "E":
@@ -60,14 +64,27 @@ class LogicaJuego(QObject):
                 laberinto[conejo_y][conejo_x] = "-"
                 self.senal_resultado_movimiento.emit(laberinto, "W", False, "M")
             elif conejo_y > 0 and laberinto[conejo_y - 1][conejo_x] != 'P':
-                laberinto[conejo_y - 1][conejo_x] = "C"
-                laberinto[conejo_y][conejo_x] = "-"
+                if laberinto[conejo_y - 1][conejo_x] in ['BM', 'BC']:
+                    item = laberinto[conejo_y+1][conejo_x]
+                    self.objeto_bajo_conejo = item
+                    laberinto[conejo_y - 1][conejo_x] = "C"
+                    laberinto[conejo_y][conejo_x] = "-"
+                elif self.objeto_bajo_conejo != None:
+                    laberinto[conejo_y - 1][conejo_x] = "C"
+                    laberinto[conejo_y][conejo_x] = self.objeto_bajo_conejo
+                    self.objeto_bajo_conejo = None
+                else:
+                    laberinto[conejo_y - 1][conejo_x] = "C"
+                    laberinto[conejo_y][conejo_x] = "-"
                 self.senal_resultado_movimiento.emit(laberinto, "W", True, "V")
             else:
                 self.senal_resultado_movimiento.emit(laberinto, "W", False, "V")
         elif tecla == 'A':
             # Movimiento hacia la izquierda
-            if conejo_x > 0 and (laberinto[conejo_y][conejo_x -1] == 'LV' or laberinto[conejo_y][conejo_x-1] == 'LH' or laberinto[conejo_y][conejo_x-1] == 'Z'):
+            
+            if conejo_x > 0 and laberinto[conejo_y][conejo_x -1] == 'S':
+                self.senal_nuevo_nivel.emit()
+            elif conejo_x > 0 and (laberinto[conejo_y][conejo_x -1] == 'LV' or laberinto[conejo_y][conejo_x-1] == 'LH' or laberinto[conejo_y][conejo_x-1] == 'Z'):
                 for y in range(16):
                     for x in range(16):
                         if laberinto[y][x] == "E":
@@ -78,14 +95,25 @@ class LogicaJuego(QObject):
                 laberinto[conejo_y][conejo_x] = "-"
                 self.senal_resultado_movimiento.emit(laberinto, "A", False, "M")
             elif conejo_x > 0 and laberinto[conejo_y][conejo_x - 1] != 'P':
-                laberinto[conejo_y][conejo_x-1] = "C"
-                laberinto[conejo_y][conejo_x] = "-"
+                if laberinto[conejo_y][conejo_x-1] in ['BM', 'BC']:
+                    item = laberinto[conejo_y][conejo_x-1]
+                    self.objeto_bajo_conejo = item
+                    laberinto[conejo_y][conejo_x-1] = "C"
+                    laberinto[conejo_y][conejo_x] = "-"
+                elif self.objeto_bajo_conejo != None:
+                    laberinto[conejo_y][conejo_x-1] = "C"
+                    laberinto[conejo_y][conejo_x] = self.objeto_bajo_conejo
+                    self.objeto_bajo_conejo = None
+                else:
+                    laberinto[conejo_y][conejo_x-1] = "C"
+                    laberinto[conejo_y][conejo_x] = "-"
+                    self.objeto_bajo_conejo = None
                 self.senal_resultado_movimiento.emit(laberinto, "A", True, "V")
             else:
                 self.senal_resultado_movimiento.emit(laberinto, "A", False, "V")
         elif tecla == 'S':
             # Movimiento hacia abajo
-            if laberinto[conejo_y+1][conejo_x] == 'S':
+            if conejo_y < len(laberinto) - 1 and laberinto[conejo_y+1][conejo_x] == 'S':
                 self.senal_nuevo_nivel.emit()
             elif conejo_y < len(laberinto) - 1 and (laberinto[conejo_y+1][conejo_x] == 'LV' or laberinto[conejo_y+1][conejo_x] == 'LH' or laberinto[conejo_y+1][conejo_x] == 'Z'):
                 for y in range(16):
@@ -98,14 +126,26 @@ class LogicaJuego(QObject):
                 laberinto[conejo_y][conejo_x] = "-"
                 self.senal_resultado_movimiento.emit(laberinto, "S", False, "M")
             elif conejo_y < len(laberinto) - 1 and laberinto[conejo_y + 1][conejo_x] != 'P':
-                laberinto[conejo_y+1][conejo_x] = "C"
-                laberinto[conejo_y][conejo_x] = "-"
+                if laberinto[conejo_y + 1][conejo_x] in ['BM', 'BC']:
+                    item = laberinto[conejo_y+1][conejo_x]
+                    self.objeto_bajo_conejo = item
+                    laberinto[conejo_y+1][conejo_x] = "C"
+                    laberinto[conejo_y][conejo_x] = "-"
+                elif self.objeto_bajo_conejo != None:
+                    laberinto[conejo_y+1][conejo_x] = "C"
+                    laberinto[conejo_y][conejo_x] = self.objeto_bajo_conejo
+                    self.objeto_bajo_conejo = None
+                else:
+                    laberinto[conejo_y+1][conejo_x] = "C"
+                    laberinto[conejo_y][conejo_x] = "-"
                 self.senal_resultado_movimiento.emit(laberinto, "S", True, "V")
             else:
                 self.senal_resultado_movimiento.emit(laberinto, "S", False, "V")
         elif tecla == 'D':
             # Movimiento hacia la derecha
-            if conejo_x < len(laberinto) - 1 and (laberinto[conejo_y][conejo_x+1] == 'LV' or laberinto[conejo_y][conejo_x+1] == 'LH' or laberinto[conejo_y][conejo_x+1] == 'Z'):
+            if laberinto[conejo_y][conejo_x+1] == 'S':
+                self.senal_nuevo_nivel.emit()
+            elif conejo_x < len(laberinto) - 1 and (laberinto[conejo_y][conejo_x+1] == 'LV' or laberinto[conejo_y][conejo_x+1] == 'LH' or laberinto[conejo_y][conejo_x+1] == 'Z'):
                 for y in range(16):
                     for x in range(16):
                         if laberinto[y][x] == "E":
@@ -116,8 +156,18 @@ class LogicaJuego(QObject):
                 laberinto[conejo_y][conejo_x] = "-"
                 self.senal_resultado_movimiento.emit(laberinto, "D", False, "M")
             elif conejo_x < len(laberinto[conejo_y]) - 1 and laberinto[conejo_y][conejo_x + 1] != 'P':
-                laberinto[conejo_y][conejo_x+1] = "C"
-                laberinto[conejo_y][conejo_x] = "-"
+                if laberinto[conejo_y][conejo_x+1] in ['BM', 'BC']:
+                    item = laberinto[conejo_y][conejo_x+1]
+                    self.objeto_bajo_conejo = item
+                    laberinto[conejo_y][conejo_x+1] = "C"
+                    laberinto[conejo_y][conejo_x] = "-"
+                elif self.objeto_bajo_conejo != None:
+                    laberinto[conejo_y][conejo_x+1] = "C"
+                    laberinto[conejo_y][conejo_x] = self.objeto_bajo_conejo
+                    self.objeto_bajo_conejo = None
+                else:
+                    laberinto[conejo_y][conejo_x+1] = "C"
+                    laberinto[conejo_y][conejo_x] = "-"
                 self.senal_resultado_movimiento.emit(laberinto, "D", True, "V")
             else:
                 self.senal_resultado_movimiento.emit(laberinto, "D", False, "V")
@@ -243,6 +293,7 @@ class LogicaJuego(QObject):
             d = 'arriba'
             for i in range(y):
                 z = y-1-i
+                print(z)
                 if laberinto[z][x] == 'Z':
                     zanahoria = 1
                     if laberinto[z-1][x] == 'P':
@@ -342,20 +393,23 @@ class LogicaJuego(QObject):
                     laberinto[y][x] = '-'
         self.senal_resultado_borrar.emit(laberinto)
 
+    def recoger_item(self):
+        if self.objeto_bajo_conejo != None:
+            item = self.objeto_bajo_conejo
+            self.inventario.append(item)
+            self.objeto_bajo_conejo = None
+            self.senal_resultado_recoger.emit(item)
+        else:
+            pass
         
-
-
-
-
-
-def usar_item(item: str, inventario: list) -> tuple[bool, list]:
-    if item in inventario:
-        inventario.remove(item)  #Elimina primera instancia del ítem en el inventario
-        return True, inventario.copy()
-    
-    else:
+    def usar_item(self, item: str, inventario: list) -> tuple[bool, list]:
+        if item in inventario:
+            inventario.remove(item)  #Elimina primera instancia del ítem en el inventario
+            return True, inventario.copy()
         
-        return False, inventario.copy()
+        else:
+            
+            return False, inventario.copy()
     
 
 

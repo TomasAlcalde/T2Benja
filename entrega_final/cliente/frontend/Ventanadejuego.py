@@ -1,10 +1,17 @@
 import sys
-import os
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
-from PyQt6.QtCore import QTimer, pyqtSignal
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QLabel, QPushButton, QMessageBox,
+    QVBoxLayout
+)
+from PyQt6.QtCore import QTimer, pyqtSignal, QUrl
 from PyQt6.QtGui import QPixmap
-from parametros import DURACION_NIVEL_INICIAL, ANCHO_LABERINTO, LARGO_LABERINTO, VELOCIDAD_CONEJO, VELOCIDAD_LOBO, PONDERADOR_LABERINTO_1, PONDERADOR_LABERINTO_2, PONDERADOR_LABERINTO_3, VELOCIDAD_ZANAHORIA
+from PyQt6.QtMultimedia import QMediaPlayer
 
+from parametros import (
+    DURACION_NIVEL_INICIAL, VELOCIDAD_CONEJO, VELOCIDAD_LOBO, 
+    PONDERADOR_LABERINTO_1, PONDERADOR_LABERINTO_2, 
+    PONDERADOR_LABERINTO_3, VELOCIDAD_ZANAHORIA
+)
 
 class Ventanajuego(QWidget):
 
@@ -13,6 +20,7 @@ class Ventanajuego(QWidget):
     senal_movimiento_lobo = pyqtSignal(list, int, int, int, str)
     senal_movimiento_zanahoria = pyqtSignal(list, int, int, int, str)
     senal_borrar_enemigos = pyqtSignal(list)
+    senal_recoger = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -29,6 +37,7 @@ class Ventanajuego(QWidget):
         self.lobos = []
         self.canones = []
         self.vidas = 3
+        self.player = QMediaPlayer()
         self.inicializarUI()
 
     def inicializarUI(self):
@@ -110,8 +119,14 @@ class Ventanajuego(QWidget):
 
         # Título del inventario
         self.label_inventario_titulo = QLabel("Inventario", self.label_inventario_fondo)
-        self.label_inventario_titulo.move(25, 10)  
+        self.label_inventario_titulo.setGeometry(35, 10, 150, 40)   
         self.label_inventario_titulo.setStyleSheet("color: #FF1493;")  
+
+        # Objetos
+        self.layout_inventario = QVBoxLayout()
+        self.layout_inventario.setContentsMargins(10, 50, 10, 10)  # Los valores exactos dependen de tu diseño
+        self.layout_inventario.setSpacing(10)
+        self.label_inventario_fondo.setLayout(self.layout_inventario)
 
 
     
@@ -164,14 +179,15 @@ class Ventanajuego(QWidget):
         # Movimiento y colision lobos
         for i, lobo in enumerate(self.lobos):
             lobo_timer = QTimer(self)
-            lobo_timer.timeout.connect(lambda: self.intentarmover_lobo(i))
+            # Conecta el timeout del QTimer a una nueva función que incluye el índice.
+            lobo_timer.timeout.connect(lambda i=i: self.intentar_mover_lobo_con_indice(i))
             lobo_timer.start(int(self.tiempo_mov_lobo))
             lobo.append(lobo_timer)  # Agrega el QTimer a la información del lobo
 
         # Movimiento y colision zanahorias
         for i, canon in enumerate(self.canones):
             canon_timer = QTimer(self)
-            canon_timer.timeout.connect(lambda: self.disparar_zanahoria(i))
+            canon_timer.timeout.connect(lambda i=i: self.disparar_zanahoria_con_indice(i))
             canon_timer.start(int(self.tiempo_mov_zanahoria))
             canon.append(canon_timer)  # Agrega el QTimer a la información del canon
             label = QLabel(self)
@@ -313,7 +329,7 @@ class Ventanajuego(QWidget):
     def keyPressEvent(self, event):
         key = event.key() #Revisa la tecla apretada en valor numerico
 
-        print(key)
+        #print(key)
         # Si la letra es la "P", se pone en pausa
         if key == 80:  
             self.toggle_pausa()
@@ -359,6 +375,9 @@ class Ventanajuego(QWidget):
         elif key == 83:
             tablero = self.tablero_actual
             self.senal_tecla_movimiento.emit(tablero, "S")
+        elif key == 71:
+            tablero = self.tablero_actual
+            self.senal_recoger.emit()
     
     def mover_conejo(self, tablero, letra, booleano, status):
         if not booleano:
@@ -426,6 +445,12 @@ class Ventanajuego(QWidget):
         direccion_actual = lobo[5]  
         self.senal_movimiento_lobo.emit(self.tablero_actual, indice_lobo, lobo[3], lobo[4], direccion_actual)
 
+    def intentar_mover_lobo_con_indice(self, indice_lobo):
+        self.intentarmover_lobo(indice_lobo)
+
+    def disparar_zanahoria_con_indice(self, indice_canon):
+        self.disparar_zanahoria(indice_canon)
+
     def mover_lobo(self, tablero, indice, direccion, booleano, status):
         #print(indice,direccion, booleano)
         if booleano == False:
@@ -473,7 +498,7 @@ class Ventanajuego(QWidget):
         # Incrementa el índice del sprite y reinicia si es necesario
         lobo[6] = (lobo[6] + 1) % 3 + 1
         if lobo[0] == "LH":
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/lobo_horinzontal_{direccion}_{lobo[6]}.png'
+            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/lobo_horizontal_{direccion}_{lobo[6]}.png'
         else:
             ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/lobo_vertical_{direccion}_{lobo[6]}.png'
         pixmap_lobo = QPixmap(ruta_sprite).scaled(960 // 16, 960 // 16)
@@ -497,7 +522,7 @@ class Ventanajuego(QWidget):
             self.label_vidas.setText(f"Vidas restantes: {vidas}")
             if self.vidas == 0:
                 QMessageBox.warning(self, "Perdio", "No le quedan vidas")
-                # Guardar puntaje
+                ########### Guardar puntaje ##########
                 self.cerrar_programa()
         else:
             pass
@@ -520,6 +545,13 @@ class Ventanajuego(QWidget):
     
     def iniciar_nuevo_nivel(self):
         # Detener timers de movimiento y otros si es necesario
+        if self.nivel == 3:
+            puntaje = 0
+            self.reproducir_sonido_victoria()
+            QMessageBox.warning(self, "Ganaste!", f"Tu puntaje es:{puntaje}")
+            ###### Guardar puntaje ##########
+            self.cerrar_programa()
+
         self.timer.stop()
         self.timer_movimiento.stop()
         for lobo in self.lobos:
@@ -568,7 +600,26 @@ class Ventanajuego(QWidget):
         self.canones.clear() # Limpia la lista de canones
         self.senal_borrar_enemigos.emit(self.tablero_actual)
 
+    def anadir_item(self, item):
+        # Verifica qué tipo de ítem es y asigna el texto correspondiente
+        if item == "BM":
+            texto_item = "Bomba de manzana"
+        elif item == "BC":
+            texto_item = "Bomba de congelación"
+        else:
+            texto_item = "Ítem desconocido"
+        
+        # Crea un QLabel con el texto y lo agrega al layout del inventario
+        label_item = QLabel(texto_item)
+        label_item.setStyleSheet("color: #FF1493; font-size: 14px;")  # Estilo del texto, puede ser modificado según necesidad
+        self.layout_inventario.addWidget(label_item)
 
+    def reproducir_sonido_victoria(self):
+        print('victoria')
+        ruta_sonido = f'entrega_final/cliente/frontend/assets/sonidos/victoria.mp3'
+        url_sonido = QUrl.fromLocalFile(ruta_sonido)
+        self.player.setSource(url_sonido)
+        self.player.play()
         
     def cerrar_programa(self):
         # Cierra el programa cuando se apreta el boton salir

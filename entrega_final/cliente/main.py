@@ -27,4 +27,6 @@ if __name__ == '__main__':
     logica_juego.senal_nuevo_nivel.connect(ventana_juego.iniciar_nuevo_nivel)
     ventana_juego.senal_borrar_enemigos.connect(logica_juego.borrar_enemigos)
     logica_juego.senal_resultado_borrar.connect(ventana_juego.actualizar_tablero)
+    ventana_juego.senal_recoger.connect(logica_juego.recoger_item)
+    logica_juego.senal_resultado_recoger.connect(ventana_juego.anadir_item)
     sys.exit(app.exec())
