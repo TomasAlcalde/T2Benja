@@ -23,4 +23,8 @@ if __name__ == '__main__':
     ventana_juego.senal_movimiento_lobo.connect(logica_juego.movimiento_lobo)
     logica_juego.senal_resultado_movimiento_lobo.connect(ventana_juego.mover_lobo)
     ventana_juego.senal_movimiento_zanahoria.connect(logica_juego.movimiento_zanahoria)
+    logica_juego.senal_resultado_movimiento_zanahoria.connect(ventana_juego.mover_zanahoria)
+    logica_juego.senal_nuevo_nivel.connect(ventana_juego.iniciar_nuevo_nivel)
+    ventana_juego.senal_borrar_enemigos.connect(logica_juego.borrar_enemigos)
+    logica_juego.senal_resultado_borrar.connect(ventana_juego.actualizar_tablero)
     sys.exit(app.exec())

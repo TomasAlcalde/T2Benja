@@ -12,10 +12,15 @@ class Ventanajuego(QWidget):
     senal_tecla_pausa = pyqtSignal()
     senal_movimiento_lobo = pyqtSignal(list, int, int, int, str)
     senal_movimiento_zanahoria = pyqtSignal(list, int, int, int, str)
+    senal_borrar_enemigos = pyqtSignal(list)
 
     def __init__(self):
         super().__init__()
         self.tablero_actual = []
+        self.en_pausa = False
+        self.orden_teclas_kil = ""
+        self.orden_teclas_inf = ""  
+        self.modo_inf = False
         self.conejo_index = 1
         self.conejo_posx = 0
         self.conejo_posy = 0
@@ -89,6 +94,7 @@ class Ventanajuego(QWidget):
         self.boton_comenzar = QPushButton('Pausa', self)
         self.boton_comenzar.move(20, 250)
         self.boton_comenzar.setStyleSheet(style_button)
+        self.boton_comenzar.clicked.connect(self.toggle_pausa)
 
         # Botón para salir del programa
         self.boton_salir = QPushButton('Salir', self)
@@ -117,9 +123,15 @@ class Ventanajuego(QWidget):
         self.timer.timeout.connect(self.contador_tiempo)
         self.timer.start(1000)
         self.nivel = lvl
+        if self.nivel == 1:
+            ponderador = PONDERADOR_LABERINTO_1
+        elif self.nivel == 2:
+            ponderador = PONDERADOR_LABERINTO_2
+        elif self.nivel == 3:
+            ponderador = PONDERADOR_LABERINTO_3
         self.tiempo_mov = (1 / VELOCIDAD_CONEJO) * 1000 #Tiempo en milisegundos de movimiento
-        self.tiempo_mov_lobo = (1 / VELOCIDAD_LOBO) * 1000 
-        self.tiempo_mov_zanahoria = (1 / VELOCIDAD_LOBO) * 1000 
+        self.tiempo_mov_lobo = (1 / VELOCIDAD_LOBO) * 1000 * ponderador
+        self.tiempo_mov_zanahoria = (1 / VELOCIDAD_ZANAHORIA) * 1000 
         self.timer_movimiento = QTimer(self)
         self.timer_movimiento.timeout.connect(self.actualizar_sprite_conejo)
 
@@ -162,6 +174,22 @@ class Ventanajuego(QWidget):
             canon_timer.timeout.connect(lambda: self.disparar_zanahoria(i))
             canon_timer.start(int(self.tiempo_mov_zanahoria))
             canon.append(canon_timer)  # Agrega el QTimer a la información del canon
+            label = QLabel(self)
+            if canon[0] == "CD":
+                d = 'abajo'
+            elif canon[0] == "CU":
+                d = 'arriba'
+            elif canon[0] == "CD":
+                d = 'derecha'
+            elif canon[0] == "CL":
+                d = 'izquierda'
+            ruta_imagen = f'entrega_final/cliente/frontend/assets/sprites/zanahoria_{d}'
+            pixmap_item = QPixmap(ruta_imagen).scaled(self.tamano_celda, self.tamano_celda)
+            label.setPixmap(pixmap_item)
+            label.setGeometry(300 + x * self.tamano_celda, y * self.tamano_celda, self.tamano_celda, self.tamano_celda)
+            label.hide()
+            canon.append(label)
+            
 
     def cargar_imagen_celda(self, x, y, simbolo, tamano_celda):
         # Diccionario que asocia cada símbolo con su imagen de fondo correspondiente
@@ -243,20 +271,81 @@ class Ventanajuego(QWidget):
         
     def contador_tiempo(self):
         # Disminuye el contador de tiempo y actualiza el texto mostrado
-        if self.tiempo_restante > 0:
-            self.tiempo_restante -= 1
-            self.actualizar_tiempo()
-        else:
-            self.timer.stop()
-            QMessageBox.information(self, "Tiempo agotado", "¡Se acabó el tiempo!")
+        if not self.modo_inf:
+            if self.tiempo_restante > 0:
+                self.tiempo_restante -= 1
+                self.actualizar_tiempo()
+            else:
+                self.timer.stop()
+                QMessageBox.information(self, "Tiempo agotado", "¡Se acabó el tiempo!")
+            
 
     def actualizar_tiempo(self):
         # Actualiza el texto de tiempo con el tiempo restante
         self.label_tiempo.setText(f"Tiempo: {self.tiempo_restante} segundos")
 
+    def toggle_pausa(self):
+        # Esta función cambia el estado de pausa del juego
+        self.en_pausa = not self.en_pausa
+        if self.en_pausa:
+            self.detener_juego()
+        else:
+            self.reanudar_juego()
+
+    def detener_juego(self):
+        # Detiene todos los timers y cualquier otra funcionalidad que deba pausarse
+        self.timer.stop()
+        self.timer_movimiento.stop()
+        for lobo in self.lobos:
+            lobo[-1].stop()
+        for canon in self.canones:
+            canon[-2].stop()
+
+    def reanudar_juego(self):
+        # Reanuda todos los timers y cualquier otra funcionalidad que estuviera en pausa
+        self.timer.start()
+        self.timer_movimiento.start()
+        for lobo in self.lobos:
+            lobo[-1].start()
+        for canon in self.canones:
+            canon[-2].start()
+
     def keyPressEvent(self, event):
         key = event.key() #Revisa la tecla apretada en valor numerico
+
         print(key)
+        # Si la letra es la "P", se pone en pausa
+        if key == 80:  
+            self.toggle_pausa()
+
+        # Truco: Matar a los enemigos K + I + L
+        if event.key() == 75: 
+            self.orden_teclas_kil = "K"
+        
+        elif event.key() == 73 and self.orden_teclas_kil == "K":  
+            self.orden_teclas_kil += "I"
+
+        elif event.key() == 76 and self.orden_teclas_kil == "KI":  
+            self.eliminar_enemigos()
+            self.orden_teclas_kil = ""  
+        else:
+            self.orden_teclas_kil = ""
+
+        # Truco: Vidas y tiempo infinito I + N + F
+        if event.key() == 73:  # 73 es el código de la tecla 'I'
+            self.orden_teclas_inf = "I"
+        elif event.key() == 78 and self.orden_teclas_inf == "I":  # 78 es el código de la tecla 'N'
+            self.orden_teclas_inf += "N"
+        elif event.key() == 70 and self.orden_teclas_inf == "IN":  # 70 es el código de la tecla 'F'
+            self.activar_modo_infinito()
+            self.orden_teclas_inf = ""  # Resetea la secuencia después de activar el evento
+        else:
+            self.orden_teclas_inf = ""
+
+        # Si esta en pausa no funcionan las teclas
+        if self.en_pausa:
+            return
+        
         # Dependiendo de la letra manda la señal al backend
         if key == 68:
             tablero = self.tablero_actual
@@ -270,8 +359,7 @@ class Ventanajuego(QWidget):
         elif key == 83:
             tablero = self.tablero_actual
             self.senal_tecla_movimiento.emit(tablero, "S")
-        
-
+    
     def mover_conejo(self, tablero, letra, booleano, status):
         if not booleano:
             if status == "M":
@@ -339,7 +427,7 @@ class Ventanajuego(QWidget):
         self.senal_movimiento_lobo.emit(self.tablero_actual, indice_lobo, lobo[3], lobo[4], direccion_actual)
 
     def mover_lobo(self, tablero, indice, direccion, booleano, status):
-        print(indice, direccion, status)
+        #print(indice,direccion, booleano)
         if booleano == False:
             self.lobos[indice][5] = direccion
     
@@ -366,13 +454,25 @@ class Ventanajuego(QWidget):
     def disparar_zanahoria(self, indice_canon):
         canon = self.canones[indice_canon]
         self.senal_movimiento_zanahoria.emit(self.tablero_actual, indice_canon, canon[3], canon[4], canon[0])
+
+    def mover_zanahoria(self, tablero, indice, x, y, status, direccion, conejo):
+        self.tablero_actual = tablero
+        if conejo == "M":
+            self.tablero_actual = tablero
+            for y in range(16):
+                for x in range(16):
+                    if tablero[y][x] == 'C':
+                        self.actualizar_conejo_entrada(x, y)
+                        self.actualizar_vidas(self.vidas - 1)
+        self.actualizar_sprite_zanahoria(indice, x, y, status, direccion)
         
 
     def actualizar_sprite_lobo(self, indice_lobo, direccion):
+        #print(self.lobos)
         lobo = self.lobos[indice_lobo]
         # Incrementa el índice del sprite y reinicia si es necesario
         lobo[6] = (lobo[6] + 1) % 3 + 1
-        if lobo[0] == "VH":
+        if lobo[0] == "LH":
             ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/lobo_horinzontal_{direccion}_{lobo[6]}.png'
         else:
             ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/lobo_vertical_{direccion}_{lobo[6]}.png'
@@ -383,14 +483,32 @@ class Ventanajuego(QWidget):
         lobo_label.setGeometry(300 + lobo[3] * (960 // 16), lobo[4] * (960 // 16), 960 // 16, 960 // 16)
         lobo_label.raise_()
 
+    def actualizar_sprite_zanahoria(self, indice_canon, x, y, status, direccion):
+        canon = self.canones[indice_canon]
+        if status == 0:
+            canon[6].hide()
+        else:
+            canon[6].setGeometry(300 + x * (960 // 16), y * (960 // 16), 960 // 16, 960 // 16)
+            canon[6].show()
 
     def actualizar_vidas(self, vidas):
-        self.vidas = vidas
-        self.label_vidas.setText(f"Vidas restantes: {vidas}")
-        if self.vidas == 0:
-            QMessageBox.warning(self, "Perdio", "No le quedan vidas")
-            self.cerrar_programa()
-            ### GUARDAR PUNTAJES ###
+        if not self.modo_inf:
+            self.vidas = vidas
+            self.label_vidas.setText(f"Vidas restantes: {vidas}")
+            if self.vidas == 0:
+                QMessageBox.warning(self, "Perdio", "No le quedan vidas")
+                # Guardar puntaje
+                self.cerrar_programa()
+        else:
+            pass
+
+    def activar_modo_infinito(self):
+        self.modo_inf = True
+        self.label_vidas.setText("Vidas restantes: ∞")
+        
+    def actualizar_tablero(self, tablero):
+        self.tablero_actual = tablero
+        print(tablero)
 
     def actualizar_conejo_entrada(self, x, y):
         ruta_imagen = f'entrega_final/cliente/frontend/assets/sprites/conejo_abajo_1.png'
@@ -400,6 +518,58 @@ class Ventanajuego(QWidget):
         self.conejo_posx = 300 + x * self.tamano_celda
         self.conejo_posy = y * self.tamano_celda
     
+    def iniciar_nuevo_nivel(self):
+        # Detener timers de movimiento y otros si es necesario
+        self.timer.stop()
+        self.timer_movimiento.stop()
+        for lobo in self.lobos:
+            lobo[-1].stop()  
+        for canon in self.canones:
+            canon[-2].stop()  
+
+        # Limpiar la lista de lobos y cañones para el nuevo nivel
+        self.lobos.clear()
+        self.canones.clear()
+        self.tablero_actual = []
+
+        # Cargar el nuevo tablero
+        self.nivel += 1
+
+        # Reiniciar el tiempo
+        self.tiempo_restante = DURACION_NIVEL_INICIAL
+        self.actualizar_tiempo()
+
+        # Reiniciar el timer del juego
+        self.timer.start(1000)
+
+        if self.nivel == 1:
+            ponderador = PONDERADOR_LABERINTO_1
+        elif self.nivel == 2:
+            ponderador = PONDERADOR_LABERINTO_2
+        elif self.nivel == 3:
+            ponderador = PONDERADOR_LABERINTO_3
+
+        self.tiempo_mov_lobo = (1 / VELOCIDAD_LOBO) * 1000 * ponderador
+        self.timer_movimiento = QTimer(self)
+        self.timer_movimiento.timeout.connect(self.actualizar_sprite_conejo)
+
+        self.cargar_mapa()
+
+    def eliminar_enemigos(self):
+        # Detiene el movimiento y la generación zanahorias
+        for lobo in self.lobos:
+            lobo[-1].stop()  
+            lobo[7].hide()   
+        self.lobos.clear()  # Limpia la lista de lobos
+
+        for canon in self.canones:
+            canon[-2].stop()  
+            canon[6].hide()   
+        self.canones.clear() # Limpia la lista de canones
+        self.senal_borrar_enemigos.emit(self.tablero_actual)
+
+
+        
     def cerrar_programa(self):
         # Cierra el programa cuando se apreta el boton salir
         self.close()  
