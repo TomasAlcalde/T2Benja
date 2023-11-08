@@ -15,6 +15,8 @@ Abre la ventana de inicio, recibe un username y lo corrige para ver si esta malo
 
 Los sonidos estan implementados pero no funcionan bien.
 
+Los archivos cumplen con las reglas de pep8, las lineas son lo suficientemente largas sin pasarse, clases con Mayusculas etc.
+
 ### Cosas implementadas y no implementadas :white_check_mark: :x:
 
 
@@ -42,10 +44,14 @@ Se notifica con el mensaje y se muestra el puntaje total, aunque este implementa
 Funciona recoger objetos pero no ponerlos con el click, la imagen no se borra del frontend cuando se recoge, pero si del back por lo que no se puede recoger denuevo (Viendo lo positivo)
 ##### ✅ Cheatcodes (Pausa, K+I+L, I+N+F):
 Funcionan correctamente los 3, sin fallas.
-##### ❌✅🟠 Networking
-##### ❌✅🟠 Decodificación
-##### ❌✅🟠 Desencriptación
-##### ❌✅🟠 Archivos
+##### ✅ Networking:
+Funciona correctamente
+##### ✅ Decodificación:
+Funciona correctamente
+##### ✅ Desencriptación: 
+Funciona correctamente
+##### ✅ Archivos:
+Distribuidos de manera correcta en su arquitectura
 ##### ✅ Funciones:
 Correcto uso de las funciones, cambiandolas a su respectivo funcionamiento con las clases y el manejo de senales entre backend y frontend
 
