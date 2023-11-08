@@ -111,7 +111,8 @@ class Ventanainicio(QWidget):
 
         # Lista de puntajes
         self.puntajes = QLabel(self.marco_fama)
-        self.puntajes.setText('1. Usuario1 - 100\n2. Usuario2 - 90\n3. Usuario3 - 80\n4. Usuario4 - 70\n5. Usuario5 - 60')
+        self.puntajes.setText('1. Usuario1 - 100\n2. Usuario2 - 90\n' + 
+                              '3. Usuario3 - 80\n4. Usuario4 - 70\n5. Usuario5 - 60')
         self.puntajes.move(75, 70)
         self.puntajes.setStyleSheet(style_label2)
 

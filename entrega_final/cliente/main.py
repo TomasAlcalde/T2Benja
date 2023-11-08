@@ -3,7 +3,8 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdi
 from PyQt6.QtGui import QPixmap
 from frontend.Ventanadeinicio import Ventanainicio
 from frontend.Ventanadejuego import Ventanajuego
-from backend.logica import LogicaLogin, LogicaJuego
+from backend.logica import LogicaJuego
+from backend.logica_login import LogicaLogin
 from backend.cliente import Cliente
 
 
