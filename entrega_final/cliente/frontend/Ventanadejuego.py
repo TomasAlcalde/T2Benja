@@ -12,6 +12,7 @@ class Ventanajuego(QWidget):
     senal_tecla_pausa = pyqtSignal()
     senal_movimiento_lobo = pyqtSignal(list, int, int, int, str)
     senal_movimiento_zanahoria = pyqtSignal(list, int, int, int, str)
+    senal_guardar_puntaje = pyqtSignal(str, int, int, int)
 
     def __init__(self):
         super().__init__()
@@ -110,7 +111,8 @@ class Ventanajuego(QWidget):
 
     
 ### ---------------------- Funciones ---------------------- ###
-    def abrir_ventana(self, lvl):
+    def abrir_ventana(self, nombre, lvl):
+        self.nombre = nombre
         self.show()
         # Crea un QTimer
         self.timer = QTimer(self)
@@ -129,11 +131,11 @@ class Ventanajuego(QWidget):
     def cargar_mapa(self):
         # Lee la ruta del archivo segun el nivel en el que este se encuentre
         if self.nivel == 1:
-            ruta_archivo = 'entrega_final/cliente/frontend/assets/laberintos/tablero_1.txt'
+            ruta_archivo = 'frontend/assets/laberintos/tablero_1.txt'
         elif self.nivel == 2:
-            ruta_archivo = 'entrega_final/cliente/frontend/assets/laberintos/tablero_2.txt'
+            ruta_archivo = 'frontend/assets/laberintos/tablero_2.txt'
         elif self.nivel == 3:
-            ruta_archivo = 'entrega_final/cliente/frontend/assets/laberintos/tablero_3.txt'
+            ruta_archivo = 'frontend/assets/laberintos/tablero_3.txt'
         with open(ruta_archivo, 'r') as archivo:
             lineas = archivo.readlines()
 
@@ -182,7 +184,7 @@ class Ventanajuego(QWidget):
         }
 
         image = imagenes[simbolo]
-        ruta_imagen = f'entrega_final/cliente/frontend/assets/sprites/{image}'
+        ruta_imagen = f'frontend/assets/sprites/{image}'
         pixmap_fondo = QPixmap(ruta_imagen).scaled(tamano_celda, tamano_celda)
         label = QLabel(self)
         label.setPixmap(pixmap_fondo)
@@ -210,7 +212,7 @@ class Ventanajuego(QWidget):
             }
 
             image = imagenes[simbolo]
-            ruta_imagen = f'entrega_final/cliente/frontend/assets/sprites/{image}'
+            ruta_imagen = f'frontend/assets/sprites/{image}'
             pixmap_item = QPixmap(ruta_imagen).scaled(tamano_celda, tamano_celda)
             if simbolo == "C":
                 self.conejo_label = QLabel(self)
@@ -296,16 +298,16 @@ class Ventanajuego(QWidget):
         # Actualiza la posición del conejo basado en la dirección
         if self.direccion == "D":
             self.conejo_posx += 960 // (16 * 4)
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/conejo_derecha_{self.conejo_index}.png'
+            ruta_sprite = f'frontend/assets/sprites/conejo_derecha_{self.conejo_index}.png'
         elif self.direccion == "A":
             self.conejo_posx -= 960 // (16 * 4)
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/conejo_izquierda_{self.conejo_index}.png'
+            ruta_sprite = f'frontend/assets/sprites/conejo_izquierda_{self.conejo_index}.png'
         elif self.direccion == "W":
             self.conejo_posy -= 960 // (16 * 4)
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/conejo_arriba_{self.conejo_index}.png'
+            ruta_sprite = f'frontend/assets/sprites/conejo_arriba_{self.conejo_index}.png'
         elif self.direccion == "S":
             self.conejo_posy += 960 // (16 * 4)
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/conejo_abajo_{self.conejo_index}.png'
+            ruta_sprite = f'frontend/assets/sprites/conejo_abajo_{self.conejo_index}.png'
 
         # Actualiza el sprite del conejo
         pixmap_conejo = QPixmap(ruta_sprite).scaled(960 // 16, 960 // 16)
@@ -326,7 +328,7 @@ class Ventanajuego(QWidget):
                 direccion = "arriba"
             elif self.direccion == "S":
                 direccion = "abajo"
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/conejo_{direccion}_{self.conejo_index}.png'
+            ruta_sprite = f'frontend/assets/sprites/conejo_{direccion}_{self.conejo_index}.png'
             pixmap_conejo = QPixmap(ruta_sprite).scaled(960 // 16, 960 // 16)
             self.conejo_label.setPixmap(pixmap_conejo)
             self.conejo_label.setGeometry(self.conejo_posx, self.conejo_posy, 960 // 16, 960 // 16)
@@ -373,9 +375,9 @@ class Ventanajuego(QWidget):
         # Incrementa el índice del sprite y reinicia si es necesario
         lobo[6] = (lobo[6] + 1) % 3 + 1
         if lobo[0] == "VH":
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/lobo_horinzontal_{direccion}_{lobo[6]}.png'
+            ruta_sprite = f'frontend/assets/sprites/lobo_horinzontal_{direccion}_{lobo[6]}.png'
         else:
-            ruta_sprite = f'entrega_final/cliente/frontend/assets/sprites/lobo_vertical_{direccion}_{lobo[6]}.png'
+            ruta_sprite = f'frontend/assets/sprites/lobo_vertical_{direccion}_{lobo[6]}.png'
         pixmap_lobo = QPixmap(ruta_sprite).scaled(960 // 16, 960 // 16)
         lobo_label = lobo[7]  
         lobo_label.setPixmap(pixmap_lobo)
@@ -393,7 +395,7 @@ class Ventanajuego(QWidget):
             ### GUARDAR PUNTAJES ###
 
     def actualizar_conejo_entrada(self, x, y):
-        ruta_imagen = f'entrega_final/cliente/frontend/assets/sprites/conejo_abajo_1.png'
+        ruta_imagen = f'frontend/assets/sprites/conejo_abajo_1.png'
         pixmap_item = QPixmap(ruta_imagen).scaled(self.tamano_celda, self.tamano_celda)
         self.conejo_label.setPixmap(pixmap_item)
         self.conejo_label.setGeometry(300 + x * self.tamano_celda, y * self.tamano_celda, self.tamano_celda, self.tamano_celda)
@@ -402,6 +404,7 @@ class Ventanajuego(QWidget):
     
     def cerrar_programa(self):
         # Cierra el programa cuando se apreta el boton salir
+        self.senal_guardar_puntaje.emit(self.nombre, 0, self.nivel - 1, self.vidas)
         self.close()  
         QApplication.instance().quit()  
     

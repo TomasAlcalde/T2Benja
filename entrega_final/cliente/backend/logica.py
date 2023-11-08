@@ -3,11 +3,13 @@ from PyQt6.QtCore import pyqtSignal, QObject
 class LogicaLogin(QObject):
 
     senal_resultado_login = pyqtSignal(bool)
+    senal_revisar_usuario = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
 
     def validacion_formato(self, nombre:str) -> bool:
+        self.nombre = nombre
         countador_mayusculas = 0
         countador_digitos = 0
 
@@ -22,9 +24,13 @@ class LogicaLogin(QObject):
 
         # Verificar condiciones de mayúsculas, dígitos y longitud
         if countador_mayusculas >= 1 and countador_digitos >= 1 and len(nombre) >= 3 and len(nombre) <= 16:
-            self.senal_resultado_login.emit(True)
+            self.senal_revisar_usuario.emit(nombre)
         else:
             self.senal_resultado_login.emit(False)
+    
+    def validacion_usuario(self, valido: bool) -> bool:
+        if valido:
+            self.senal_resultado_login.emit(True)
     
 
 class LogicaJuego(QObject):
@@ -204,14 +210,14 @@ class LogicaJuego(QObject):
 
     def movimiento_zanahoria(self, laberinto: list, indice:int, x: int, y: int, direccion: str) -> (list, int, str, bool):
         zanahoria = 0
-        if direccion == "CD":
+        """if direccion == "CD":
             for i in range(y, 16):
                 if laberinto[i][x] == 'Z':
                     zanahoria = 1
                     if laberinto[i+1][x] == 'P':
                         
                     laberinto[i+1][x] = 'Z'
-                    laberinto[i][x] = '-'
+                    laberinto[i][x] = '-' """
 
 
 
